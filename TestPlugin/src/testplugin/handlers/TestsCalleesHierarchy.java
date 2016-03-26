@@ -35,8 +35,9 @@ public class TestsCalleesHierarchy
 			for (MethodSignature ms : Arrays.asList(SIGNATURES))
 			{
 				long startTimeMillis = System.currentTimeMillis();
-				System.out.println("############# Checking Callee Hierarchy for signature: " + ms + " #########################");
-				System.out.println(" - starting at " + new Timestamp(startTimeMillis));
+				CommonUtils.newLinePrint("");
+				CommonUtils.newLinePrint("############# Checking Callee Hierarchy for signature: " + ms + " #########################");
+				CommonUtils.newLinePrint(" - starting at " + new Timestamp(startTimeMillis));
 				IMethod method = CommonUtils.findMethod(ms);
 				if (method != null)
 				{
@@ -48,7 +49,9 @@ public class TestsCalleesHierarchy
 					}
 				}
 				long endTimeMillis = System.currentTimeMillis();
-				System.out.println(" - ended at " + new Timestamp(endTimeMillis) + "; took " + ((endTimeMillis - startTimeMillis) / 1000 / 60) + " minutes");
+				long noOfMillis = endTimeMillis - startTimeMillis;
+				long noOfSeconds = noOfMillis / 1000;
+				CommonUtils.newLinePrint(" - ended at " + new Timestamp(endTimeMillis) + "; took " + ((noOfSeconds < 60) ? noOfSeconds + " seconds" : (noOfSeconds / 60) + " minutes"));
 			}
 		} catch (CoreException e)
 		{
@@ -79,7 +82,7 @@ public class TestsCalleesHierarchy
 		}
 		if ((mw.getMember() instanceof SourceMethod) && ((SourceMethod) mw.getMember()).isConstructor())
 		{
-			if (fullyQualifiedName.contains("Query"))
+			if (containsStopTokens(fullyQualifiedName))
 			{
 				// displayCalle(mw, localPrefix);
 				return true;
@@ -106,17 +109,17 @@ public class TestsCalleesHierarchy
 		String callSignature = CommonUtils.buildCalleeSignature((IMethod) mw.getMember());
 		if (detectedRecursion(mw, mw.getParent()))
 		{
-			System.out.println(prefix + "!!!STOP-Recursion at " + callSignature + "!!!");
+			CommonUtils.newLinePrint(prefix + "!!!STOP-Recursion at " + callSignature + "!!!");
 			return false;
 		}
 
 		if (METHODS_CALLEES_ALREADY_DISPLAYED.contains(callSignature))
 		{
-			System.out.println(prefix + "!!!STOP - callees for method " + callSignature + " already printed!!!");
+			CommonUtils.newLinePrint(prefix + "!!!STOP - callees for method " + callSignature + " already printed!!!");
 			return false;
 		}
 
-		System.out.println(localPrefix + ("lvl=" + String.format("%03d", mw.getLevel())) + " " + callSignature);
+		CommonUtils.newLinePrint(localPrefix + ("lvl=" + String.format("%03d", mw.getLevel())) + " " + callSignature);
 
 		if (mw.getMember().getDeclaringType().isInterface())
 		{
@@ -140,11 +143,24 @@ public class TestsCalleesHierarchy
 				if (findCalleesPaths(callHierarchy, call, localPrefix))
 				{
 					// Query constructor found -> do not continue with rest of methods on the same level
+					System.out.print(" -> !!!CHECK THAT METHOD!!!");
 					break;
 				}
 			}
 		}
 		METHODS_CALLEES_ALREADY_DISPLAYED.add(callSignature);
+		return false;
+	}
+
+	private static boolean containsStopTokens(String fullyQualifiedName)
+	{
+		for (String tkn : STOP_TOKENS)
+		{
+			if (fullyQualifiedName.contains(tkn))
+			{
+				return true;
+			}
+		}
 		return false;
 	}
 
@@ -290,6 +306,8 @@ public class TestsCalleesHierarchy
 			/* new MethodSignature("CallerTestPrj", "com.mind.callertestprj.CallerTest3", "MyObject3 test1(com.mind.test.MyObject1 p1, MyObject1 p2, int i, String s)", false) */
 			/* new MethodSignature("MindBill-Core_Core-ejb", "com.mind.csr.core.management.account.beans.session.AccountBean", "AccountDTO load(BaseContext info, long accountID, String code)", false), */
 			/* new MethodSignature("MindBill-Core_Core-ejb", "com.mind.csr.core.management.account.beans.session.AccountBean", "boolean update(BaseContext info, long accountID, String accountCode, Map mapDto)", false), */
+
+			// - HOTBILLING -
 			new MethodSignature("MindBill-WF_MindBill_Client", "com.mind.ejb.client.CoreEjbClient", "com.mind.csr.core.management.account.dto.AccountDTO getAccount ( com.mind.j2ee.utils.CoreContext.BaseContext info, long accountID, java.lang.String code )", false),
 			new MethodSignature("MindBill-WF_MindBill_Client", "com.mind.ejb.client.CoreEjbClient", "java.util.Map getAccount ( com.mind.j2ee.utils.CoreContext.BaseContext info, java.lang.String code, long accountID, java.util.Map requestedKeys )", false),
 			new MethodSignature("MindBill-WF_MindBill_Client", "com.mind.ejb.client.CoreEjbClient", "java.util.Map getAccountServiceList ( com.mind.j2ee.utils.CoreContext.BaseContext info, com.mind.csr.core.management.accountservice.dto.GetAccountServiceListFilterDTO filter )", false),
@@ -304,6 +322,18 @@ public class TestsCalleesHierarchy
 			new MethodSignature("MindBill-WF_MindBill_Client", "com.mind.ejb.client.CoreEjbClient",
 					"java.util.Map<com.mind.utils.Pair<java.lang.Long,java.lang.String>,java.lang.Boolean> loadServiceNotAllowedToConsumeFromAccountBalanceData ( com.mind.j2ee.utils.CoreContext.BaseContext info, java.util.List<com.mind.utils.Pair<java.lang.Long,java.lang.String>> asvs )", false)
 
+	// - various tests -
+	// new MethodSignature("MindBill-Core_Core-ejb", "com.mind.csr.core.management.account.actions.GetAccount", "AccountDTO getAccount(CoreContext context, LoadAccountFilter filter)", false),// check call to another project (Common)
+	// new MethodSignature("MindBill-Core_Core-ejb", "com.mind.csr.core.management.status.actions.ProcessCorrelationQueue", "void perform(CoreContext tc)", false),// check storeprocedure
+	// new MethodSignature("MindBill-Core_Core-ejb", "com.mind.csr.core.management.account.actions.GetAccount", "AccountDTO performWithoutViewAccountSR(CoreContext context, LoadAccountFilter filter)", false)
+
 	};
 	private static Set<String> METHODS_CALLEES_ALREADY_DISPLAYED = new HashSet<String>();
+	private static Set<String> STOP_TOKENS = new HashSet<String>()
+	{
+		{
+			add("Query");
+			add("StoredProc");
+		}
+	};
 }

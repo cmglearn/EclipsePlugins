@@ -37,7 +37,7 @@ public class SampleHandler extends AbstractHandler
 	public Object execute(ExecutionEvent event) throws ExecutionException
 	{
 		CommonUtils.redirectOutputToFile("e:/eclipseOutput.log");
-		System.out.println(">>>START_TASK");
+		CommonUtils.newLinePrint(">>>START_TASK");
 		// IWorkbenchWindow window = HandlerUtil
 		// .getActiveWorkbenchWindowChecked(event);
 		// MessageDialog.openInformation(window.getShell(), "TestPlugin",
@@ -45,7 +45,7 @@ public class SampleHandler extends AbstractHandler
 
 		// callersHierarchy();
 		calleesHierarchy();
-		System.out.println(">>>END_TASK");
+		CommonUtils.newLinePrint(">>>END_TASK");
 		return null;
 	}
 

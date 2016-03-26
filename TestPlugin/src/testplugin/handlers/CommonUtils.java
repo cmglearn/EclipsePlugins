@@ -29,7 +29,7 @@ public class CommonUtils
 
 	public static String buildCalleeSignature(IMethod m) throws CoreException
 	{
-		//IMethod m = (IMethod) caller.getMember();// SourceType st; st.getFullyQualifiedName()
+		// IMethod m = (IMethod) caller.getMember();// SourceType st; st.getFullyQualifiedName()
 		// add declaring type
 		String result = m.getDeclaringType().getFullyQualifiedName();
 		// add method name
@@ -210,7 +210,8 @@ public class CommonUtils
 		// result);
 		// remove parameters names
 		result = removeParametersNames(result);
-		System.out.println("ORIGINAL:" + original + "\n" + "RESULT  :" + result);
+		newLinePrint("ORIGINAL:" + original);
+		newLinePrint("RESULT  :" + result);
 
 		return result.trim();
 	}
@@ -229,7 +230,7 @@ public class CommonUtils
 			while ((line = br.readLine()) != null)
 			{
 				String[] split = line.split("\\#");
-				System.out.println(line);
+				newLinePrint(line);
 				MethodSignature ms = new MethodSignature(split[0], split[1], split[2], (split.length >= 4) && "Y".equals(split[3]));
 				result.add(ms);
 			}
@@ -239,6 +240,12 @@ public class CommonUtils
 			e.printStackTrace();
 		}
 		return result;
+	}
+
+	public static void newLinePrint(String str)
+	{
+		System.out.println();
+		System.out.print(str);
 	}
 
 	public static class MethodSignature
