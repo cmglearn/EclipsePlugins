@@ -3,7 +3,10 @@ package testplugin.handlers;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.InputStreamReader;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -24,13 +27,11 @@ import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
 public class CommonUtils
 {
 
-	public static String buildCalleeSignature(MethodWrapper caller) throws CoreException
+	public static String buildCalleeSignature(IMethod m) throws CoreException
 	{
-		String result = "";
+		//IMethod m = (IMethod) caller.getMember();// SourceType st; st.getFullyQualifiedName()
 		// add declaring type
-		IMember member = caller.getMember();// SourceType st; st.getFullyQualifiedName()
-		result += member.getDeclaringType().getFullyQualifiedName();
-		IMethod m = (IMethod) member;
+		String result = m.getDeclaringType().getFullyQualifiedName();
 		// add method name
 		result += " " + m.getElementName() + "(";
 		ILocalVariable[] parameters = m.getParameters();
@@ -261,5 +262,40 @@ public class CommonUtils
 		{
 			return "MethodSignature [prjName=" + prjName + "clazz=" + clazz + ", method=" + method + "]";
 		}
+	}
+
+	public static void redirectOutputToFile(String filePath)
+	{
+		try
+		{
+			PrintStream out = new PrintStream(new FileOutputStream(filePath));
+			System.setOut(out);
+		} catch (FileNotFoundException e)
+		{
+			e.printStackTrace();
+		}
+	}
+
+	public static String buildPath(Path path)
+	{
+		return System.getProperty(path.getPropertyName(), "e:/"/* (path == Path.INPUT) ? "e:/inputPlugin.txt" : "e:/eclipseOutput.log" */);
+	}
+
+	public enum Path
+	{
+		INPUT("input.file.path"), OUTPUT("output.file.path");
+
+		private final String propertyName;
+
+		private Path(String propertyName)
+		{
+			this.propertyName = propertyName;
+		}
+
+		public String getPropertyName()
+		{
+			return propertyName;
+		}
+
 	}
 }
