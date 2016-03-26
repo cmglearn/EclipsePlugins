@@ -1,0 +1,4 @@
+MindBill-Common#com.mind.common.account.bridge.AccountsBridge#void insertAccountExpirationThreshold(DBConnection conn, long acctId, long invoicedAcctId, Timestamp fromDate, Timestamp toDate)#N
+MindBill-Core_Core-ejb#com.mind.csr.core.management.account.bridges.CPNIAcpBridge#long insert(CoreContext context, CPNIAcpDTO CPNIAcpDTO, long cpniID)#N
+MindBill-Core_Core-ejb#com.mind.common.account.bridge.AccountsBridge#void updateCoolingPeriodEndDate(DBConnection connection, long accountId, Timestamp coolingPeriodEndDate)#N
+MindBill-Core_Core-ejb#com.mind.csr.core.management.account.bridges.AccountBridge#void insert(CoreContext ctx, AccountDTO a)#N
